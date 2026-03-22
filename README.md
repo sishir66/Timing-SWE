@@ -1,36 +1,94 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# AI Contact Reminder — Timing Engineering Assessment
 
-## Getting Started
+A web app that helps you stay on top of your professional network by surfacing who you should reach out to and generating personalized messages for each contact.
 
-First, run the development server:
+---
 
+## How to Run
+
+1. Clone the repo and install dependencies:
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. Create a `.env.local` file in the root:
+```
+GEMINI_API_KEY=your_key_here
+```
+If no key is provided, the app falls back to template-based message generation automatically.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+3. Start the dev server:
+```bash
+npm run dev
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+4. Open `http://localhost:3000`
 
-## Learn More
+---
 
-To learn more about Next.js, take a look at the following resources:
+## What It Does
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- **All Contacts** — view, search, filter, and sort your contacts
+- **Recommendations** — automatically surfaces who you should reach out to based on how long it's been and your relationship type
+- **Contact Profiles** — click any contact to see their details and generate a personalized outreach message
+- **Full CRUD** — add, edit, and delete contacts via a clean modal UI
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+---
 
-## Deploy on Vercel
+## API Endpoints
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/contacts` | Returns all contacts |
+| POST | `/api/contacts` | Adds a new contact |
+| PUT | `/api/contacts/:id` | Updates a contact |
+| DELETE | `/api/contacts/:id` | Deletes a contact |
+| GET | `/api/recommendations` | Returns prioritized list of who to reach out to |
+| POST | `/api/generate-message` | Generates a personalized outreach message |
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+---
+
+## Recommendation Logic
+
+A contact is recommended if:
+- They haven't been contacted in **30+ days**
+- OR their notes contain: `mentor`, `investor`, `advisor`, or `friend`
+
+Results are sorted by relationship priority (investor → mentor → advisor → friend), then by longest time since contact.
+
+---
+
+## Key Design Decisions
+
+- **Next.js App Router** — single repo for both frontend and API, no need for a separate backend
+- **In-memory store** — contacts are seeded from `data/contacts.json` and kept in memory. Simple, fast, and appropriate for a prototype
+- **Gemini API with simulation fallback** — if no API key is present, the app generates clean template-based messages so the feature always works
+- **No external database** — deliberately avoided to keep setup friction near zero
+
+---
+
+## Assumptions
+
+- Contacts are scoped to a single user (no auth)
+- In-memory storage is acceptable for a prototype; a real implementation would use a database
+- "Last contacted date" is self-reported by the user
+
+---
+
+## What I'd Improve With More Time
+
+- Persist contacts to a database (PostgreSQL or SQLite)
+- Add user authentication
+- Use a production LLM with better prompt tuning for more varied messages
+- Add email sending directly from the app
+- Write unit tests for recommendation logic
+- Deploy to Vercel
+
+---
+
+## Tech Stack
+
+- Next.js 16 (App Router)
+- TypeScript
+- Tailwind CSS
+- Google Gemini API (with simulation fallback)
